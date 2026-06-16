@@ -14,7 +14,7 @@ graph TD
     D -->|Cleaned Paragraphs| E(Extractor Agent)
     E -->|Semantically Match >= 40%| F(Summarizer Agent)
     F -->|Generate Summary & Keywords| G(Verifier Agent)
-    G -->|Zero-Shot Categorization| H[Structured Output Report]
+    G -->|Embedding Distance Classification| H[Structured Output Report]
     
     classDef agent fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
     classDef data fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
@@ -27,7 +27,7 @@ graph TD
 
 ### Prerequisites
 * **Environment:** The notebook is configured for a Kaggle Python 3 environment, but it can be run locally with Jupyter.
-* **Hardware:** All models are CPU-friendly, though a GPU will significantly accelerate the Summarizer and Verifier agents.
+* **Hardware:** All models are CPU-friendly, though a GPU will significantly accelerate the Summarizer agent.
 
 ### Installation & Setup
 1.  **Install Dependencies:** Ensure you have the required libraries installed. 
@@ -61,9 +61,10 @@ The implementation deviates from several of the baseline recommendations to acco
 * **The Solution:** The summarizer was upgraded to `facebook/bart-large-cnn`. 
 * **Tradeoff:** This increases memory consumption and inference time. However, because the extractor agent aggressively filters out irrelevant text, the summarizer only processes small, highly relevant payloads, making the heavier model entirely manageable on a CPU.
 
-### 3. NLI-Based Verifier Agent
-* **The Problem:** The suggested `distilbert-base-uncased` model is a base model. Without fine-tuning, it cannot perform multi-class categorization into specific themes like "Deep Learning" or "Clinical Trial".
-* **The Solution:** The Verifier leverages `typeform/distilbert-base-uncased-mnli`. This variant is explicitly trained on Natural Language Inference (NLI), allowing it to perform accurate zero-shot classification against arbitrary textual themes without any prior training on this specific dataset.
+### 3. Embedding Distance Verifier Agent (Optimized)
+* **The Problem:** The initially suggested `distilbert-base-uncased` model is a base model that requires either fine-tuning or zero-shot NLI hacks to categorize text, both of which are memory-intensive and computationally slow.
+* **The Solution:** The Verifier Agent discards standalone classification models entirely. Instead, it reuses the `all-MiniLM-L6-v2` model—which is already loaded in memory for the Extractor Agent—to calculate the cosine similarity between the generated summaries and the target case-study themes (Deep Learning, Clinical Trial, Traditional Methods).
+* **Tradeoff:** This removes a massive dependency from the pipeline, saving hundreds of megabytes of RAM and reducing inference time to fractions of a second, while still maintaining high accuracy by comparing semantic vectors.
 
 ### 4. Dynamic Semantic Thresholding
 * **The Problem:** A standard "Top-K" extraction method will blindly return documents even if the query is fundamentally unrelated to the text, leading to forced, irrelevant summaries.
