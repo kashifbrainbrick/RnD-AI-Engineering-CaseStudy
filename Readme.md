@@ -17,7 +17,8 @@ The pipeline is divided into four distinct sequential agents/tiers to optimize p
 
 The initial client specifications outlined a specific data flow (download 50–100 articles first) and suggested highly lightweight models (`t5-small`, `distilbert-base-uncased`). To balance the constraints of CPU-friendly execution, speed, and scientific accuracy, the following architectural and model decisions were made:
 
-* **Retrieval Strategy & Data Sampling:** * *The Baseline:* The initial requirement was to download 50 to 100 articles locally *before* performing any search or classification. 
+* **Retrieval Strategy & Data Sampling:**
+    * *The Baseline:* The initial requirement was to download 50 to 100 articles locally *before* performing any search or classification. 
     * *The Implementation:* We inverted this to an **API-first approach**. The system queries the NCBI API with the target keyword first to identify up to 30 highly relevant PMCIDs, then downloads *only* a strictly capped number of those files. 
     * *The Tradeoff:* Downloading 100 dense academic papers blindly wastes massive amounts of bandwidth and CPU cycles on irrelevant text. Our approach saves immense compute overhead, but the tradeoff is that we rely heavily on the NCBI's external search algorithm rather than our own local semantic search over a broader downloaded corpus.
 * **Model Selection (Summarization):**
