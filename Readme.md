@@ -19,7 +19,7 @@ The initial client specifications outlined a specific data flow (download 50–1
 
 * **Retrieval Strategy & Data Sampling:**
     * *The Baseline:* The initial requirement was to download 50 to 100 articles locally *before* performing any search or classification. 
-    * *The Implementation:* We inverted this to an **API-first approach**. The system queries the NCBI API with the target keyword first to identify up to 30 highly relevant PMCIDs, then downloads *only* a strictly capped number of those files. 
+    * *The Implementation:* We inverted this to an **API-first approach**. The system queries the NCBI API with the target keyword first to identify up to 100 highly relevant PMCIDs, then downloads *only* a strictly capped number of those files. 
     * *The Tradeoff:* Downloading 100 dense academic papers blindly wastes massive amounts of bandwidth and CPU cycles on irrelevant text. Our approach saves immense compute overhead, but the tradeoff is that we rely heavily on the NCBI's external search algorithm rather than our own local semantic search over a broader downloaded corpus.
 * **Model Selection (Summarization):**
     * *The Baseline:* The client requested `t5-small`.
